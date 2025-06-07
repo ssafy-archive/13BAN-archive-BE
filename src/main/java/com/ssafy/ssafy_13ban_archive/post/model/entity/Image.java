@@ -25,4 +25,8 @@ public class Image {
 
     @Column(name="post_id", nullable = false)
     private Integer postId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false, insertable = false, updatable = false)
+    private Post post;
 }
