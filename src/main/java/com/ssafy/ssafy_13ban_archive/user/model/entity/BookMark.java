@@ -30,4 +30,7 @@ public class BookMark {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false, insertable = false, updatable = false)
     private Post post;
+
+    @Column(name = "group_id", nullable = false)
+    private Integer groupId;
 }

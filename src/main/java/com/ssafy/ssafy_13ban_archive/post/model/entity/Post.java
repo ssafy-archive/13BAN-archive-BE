@@ -1,6 +1,7 @@
 package com.ssafy.ssafy_13ban_archive.post.model.entity;
 
 import com.ssafy.ssafy_13ban_archive.common.model.entity.DateEntity;
+import com.ssafy.ssafy_13ban_archive.group.model.entity.Group;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,13 @@ public class Post extends DateEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private Integer postId;
+
+    @Column(name = "group_id", nullable = false)
+    private Integer groupId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id", nullable = false, insertable = false, updatable = false)
+    private Group group;
 
     @Column(name = "title", nullable = false, length = 100)
     private String title;

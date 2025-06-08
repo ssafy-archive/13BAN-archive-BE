@@ -24,9 +24,16 @@ public class User extends DateEntity {
     @Column(name="name", nullable = false, length = 20)
     private String name;
 
-    @Column(name="ssafy_number", nullable = false, unique = true, length = 7)
+    @Column(name="ssafy_number", nullable = false, length = 7)
     private String ssafyNumber;
 
     @Column(name="password", nullable = false, length = 60)
     private String password;
+
+    @Column(name="login_id", nullable = false, unique = true, length = 20)
+    private String loginId;
+
+    @Column(name="user_role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
 }
