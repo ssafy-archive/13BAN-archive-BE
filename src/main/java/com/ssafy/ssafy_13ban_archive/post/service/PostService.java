@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.ssafy.ssafy_13ban_archive.post.exception.PostNotFoundException;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.*;
+import com.ssafy.ssafy_13ban_archive.post.model.request.PostModifyRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.request.PostRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.*;
 import com.ssafy.ssafy_13ban_archive.post.repository.PostRepository;
@@ -65,10 +66,9 @@ public class PostService {
             builder.and(post.subCategory.eq(subCategory)); // 또는 lt(subCategory)
         }
 
-        Predicate predicate = builder;
         PageRequest pageRequest = PageRequest.of(0, size, Sort.by("postId").descending());
 
-        List<Post> posts = postRepository.findAll(predicate, pageRequest).getContent();
+        List<Post> posts = postRepository.findAll(builder, pageRequest).getContent();
 
         PostListResponseDTO postListResponseDTO = new PostListResponseDTO();
         postListResponseDTO.setCategory(category);
@@ -92,6 +92,57 @@ public class PostService {
         postListResponseDTO.setPosts(simplePostResponseDTOs);
 
         return postListResponseDTO;
+    }
+
+    @Transactional
+    public PostResponseDTO modifyPost(PostModifyRequestDTO postModifyRequestDTO, Integer postId, List<MultipartFile> images, List<MultipartFile> files) {
+        // TODO: 권한 체크 로직 추가 필요
+        // 해당 post가 존재하는지 확인
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFoundException("글을 찾을 수 없습니다.");
+        }
+
+        // post 조회
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new PostNotFoundException("글을 찾을 수 없습니다.")
+        );
+
+        // post 수정
+        post.setTitle(postModifyRequestDTO.getTitle());
+        post.setContent(postModifyRequestDTO.getContent());
+
+        // 이미지 삭제
+        if (postModifyRequestDTO.getDeleteImageIds() != null) {
+            // 이미지 id가 post에 포함되어 있는지 확인하고, 포함되지 않은 경우 삭제
+            postModifyRequestDTO.getDeleteImageIds().stream().filter(id -> !images.contains(id)).forEach(images::remove);
+            fileService.deleteImagesByIds(postModifyRequestDTO.getDeleteImageIds());
+        }
+
+        // 파일 삭제
+        if (postModifyRequestDTO.getDeleteFileIds() != null) {
+            // 파일 ID가 post에 포함되어 있는지 확인하고, 포함되지 않은 경우 삭제
+            postModifyRequestDTO.getDeleteFileIds().stream().filter(id -> !files.contains(id)).forEach(files::remove);
+            fileService.deleteFilesByIds(postModifyRequestDTO.getDeleteFileIds());
+        }
+
+        // 이미지 업로드
+        List<ImageResponseDTO> imageResponseDTOs = new ArrayList<>();
+        if (images != null) {
+            imageResponseDTOs = fileService.uploadImages(
+                    images,
+                    postId,
+                    postModifyRequestDTO.getImageComments()
+            );
+        }
+
+        // 파일 업로드
+        List<FileResponseDTO> fileResponseDTOs = new ArrayList<>();
+        if (files != null) {
+            fileResponseDTOs = fileService.uploadFiles(files, postId);
+        }
+
+        // PostResponseDTO 생성
+        return convertToPostResponse(post, imageResponseDTOs, fileResponseDTOs);
     }
 
     @Transactional
@@ -129,11 +180,13 @@ public class PostService {
         }
 
         // PostResponseDTO 생성
-        return convertToPostResponse(post, imageResponseDTOs, fileResponseDTOs);
+        return getPostById(post.getPostId());
     }
 
     @Transactional
     public boolean deletePost(Integer postId) {
+        // TODO: 권한 체크 로직 추가 필요
+
         // 해당 post가 존재하는지 확인
         if (!postRepository.existsById(postId)) {
             throw new PostNotFoundException("글을 찾을 수 없습니다.");

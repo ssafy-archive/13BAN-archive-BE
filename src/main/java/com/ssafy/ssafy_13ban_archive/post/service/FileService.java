@@ -66,6 +66,18 @@ public class FileService {
         }
     }
 
+    void deleteFilesByIds(List<Integer> fileIds) {
+        if (fileIds == null || fileIds.isEmpty()) {
+            return; // 파일 ID가 없으면 성공으로 간주
+        }
+        for (Integer fileId : fileIds) {
+            File file = fileRepository.findById(fileId)
+                    .orElseThrow(() -> new IllegalArgumentException("파일을 찾을 수 없습니다. ID: " + fileId));
+            s3Util.deleteFile(file.getFileLink());
+            fileRepository.delete(file); // S3에서 삭제 후 로컬 DB에서도 삭제
+        }
+    }
+
     void deleteFiles(List<File> files) {
         if (files == null || files.isEmpty()) {
             return; // 파일이 없으면 성공으로 간주
@@ -116,6 +128,18 @@ public class FileService {
         } catch (InvalidFileTypeException e) {
             log.error("잘못된 파일 형식: {}", e.getMessage());
             throw e; // 예외를 다시 던져서 호출자에게 알림
+        }
+    }
+
+    void deleteImagesByIds(List<Integer> imageIds) {
+        if (imageIds == null || imageIds.isEmpty()) {
+            return; // 이미지 ID가 없으면 성공으로 간주
+        }
+        for (Integer imageId : imageIds) {
+            Image image = imageRepository.findById(imageId)
+                    .orElseThrow(() -> new IllegalArgumentException("이미지를 찾을 수 없습니다. ID: " + imageId));
+            s3Util.deleteFile(image.getImageLink());
+            imageRepository.delete(image); // S3에서 삭제 후 로컬 DB에서도 삭제
         }
     }
 

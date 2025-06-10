@@ -4,6 +4,7 @@ import com.ssafy.ssafy_13ban_archive.common.model.reponse.CommonResponse;
 import com.ssafy.ssafy_13ban_archive.common.model.reponse.SuccessResponseDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.PostCategory;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.PostSubCategory;
+import com.ssafy.ssafy_13ban_archive.post.model.request.PostModifyRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.request.PostRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.PostListResponseDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.PostResponseDTO;
@@ -51,6 +52,19 @@ public class PostController {
         return new CommonResponse<>(
                 postService.createPost(postRequestDTO, images, files),
                 HttpStatus.CREATED
+        );
+    }
+
+    @PostMapping("/{postId}/modify")
+    public CommonResponse<PostResponseDTO> modifyPost(
+            @PathVariable Integer postId,
+            @RequestPart("post") PostModifyRequestDTO postModifyRequestDTO,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
+        return new CommonResponse<>(
+                postService.modifyPost(postModifyRequestDTO, postId, images, files),
+                HttpStatus.OK
         );
     }
 
