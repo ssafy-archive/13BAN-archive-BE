@@ -1,6 +1,7 @@
 package com.ssafy.ssafy_13ban_archive.post.service;
 
 import com.ssafy.ssafy_13ban_archive.common.util.S3Util;
+import com.ssafy.ssafy_13ban_archive.post.exception.FileNotUploadedException;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.File;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.Image;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.Post;
@@ -27,10 +28,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PostService {
 
-    private final S3Util s3Util;
     private final PostRepository postRepository;
-    private final FileRepository fileRepository;
-    private final ImageRepository imageRepository;
+    private final FileService fileService;
 
     @Transactional
     public PostResponseDTO createPost(
@@ -39,79 +38,35 @@ public class PostService {
             List<MultipartFile> files
     ) {
 
-        try{
-            // post 생성
-            Post post = Post.builder()
-                    .title(postRequestDTO.getTitle())
-                    .content(postRequestDTO.getContent())
-                    .groupId(postRequestDTO.getGroupId())
-                    .userId(1) // 임시 유저아이디
-                    .viewCount(0)
-                    .category(postRequestDTO.getPostCategory())
-                    .subCategory(postRequestDTO.getPostSubCategory())
-                    .build();
+        // 파일과 이미지 응답 DTO 리스트 초기화
+        List<FileResponseDTO> fileResponseDTOs = new ArrayList<>();
+        List<ImageResponseDTO> imageResponseDTOs = new ArrayList<>();
 
-            postRepository.save(post);
+        // post 생성
+        Post post = Post.builder()
+                .title(postRequestDTO.getTitle())
+                .content(postRequestDTO.getContent())
+                .groupId(postRequestDTO.getGroupId())
+                .userId(1) // 임시 유저아이디
+                .viewCount(0)
+                .category(postRequestDTO.getPostCategory())
+                .subCategory(postRequestDTO.getPostSubCategory())
+                .build();
 
-            // 파일 업로드
-            List<FileResponseDTO> fileResponseDTOs = new ArrayList<>();
-            if(files != null){
-                for(MultipartFile file : files){
-                    String originalFilename = file.getOriginalFilename();
-                    if (originalFilename == null || originalFilename.isEmpty()) {
-                        continue; // Skip files without a valid name
-                    }
+        postRepository.save(post);
 
-                    String s3Key = generateS3Key(post.getPostId(), originalFilename, "file");
-                    ObjectMetadata objectMetadata = ObjectMetadata.builder()
-                            .contentType(file.getContentType())
-                            .build();
-                    boolean uploadSuccess = s3Util.uploadFile(s3Key, file.getInputStream(), objectMetadata);
-
-                    if (uploadSuccess) {
-                        File uploadedFile = File.builder()
-                                .fileLink(s3Key)
-                                .build();
-                        uploadedFile.setPostId(post.getPostId());
-                        fileRepository.save(uploadedFile);
-                        fileResponseDTOs.add(new FileResponseDTO(uploadedFile.getFileId(), s3Util.getFileUrl(s3Key).toString()));
-                    }
-                }
-            }
-
-            // 이미지 업로드
-            List<ImageResponseDTO> imageResponseDTOs = new ArrayList<>();
-            if(images != null) {
-                for(MultipartFile image : images){
-                    String originalFilename = image.getOriginalFilename();
-                    if (originalFilename == null || originalFilename.isEmpty()) {
-                        continue; // Skip files without a valid name
-                    }
-
-                    String s3Key = generateS3Key(post.getPostId(), originalFilename, "image");
-                    ObjectMetadata objectMetadata = ObjectMetadata.builder()
-                            .contentType(image.getContentType())
-                            .build();
-                    boolean uploadSuccess = s3Util.uploadFile(s3Key, image.getInputStream(), objectMetadata);
-
-                    if (uploadSuccess) {
-                        Image uploadedFile = Image.builder()
-                                .imageLink(s3Key)
-                                .comment("")
-                                .build();
-                        uploadedFile.setPostId(post.getPostId());
-                        imageRepository.save(uploadedFile);
-                        imageResponseDTOs.add(new ImageResponseDTO(uploadedFile.getImageId(), s3Util.getFileUrl(s3Key).toString(), ""));
-                    }
-                }
-            }
-
-            // PostResponseDTO 생성
-            return convertToPostResponse(post, imageResponseDTOs, fileResponseDTOs);
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new RuntimeException("Post creation failed: " + e.getMessage());
+        // 파일 업로드
+        if(files != null){
+            fileResponseDTOs = fileService.uploadFiles(files, post.getPostId());
         }
+
+        // 이미지 업로드
+        if(images != null) {
+            imageResponseDTOs = fileService.uploadImages(images, post.getPostId());
+        }
+
+        // PostResponseDTO 생성
+        return convertToPostResponse(post, imageResponseDTOs, fileResponseDTOs);
     }
 
     private PostResponseDTO convertToPostResponse(Post post, List<ImageResponseDTO> imageResponseDTOs, List<FileResponseDTO> fileResponseDTOs) {
@@ -131,10 +86,5 @@ public class PostService {
         );
     }
 
-    private String generateS3Key(Integer postId, String originalFilename, String type) {
-        String uuid = UUID.randomUUID().toString();
-        String encodedName = URLEncoder.encode(originalFilename, StandardCharsets.UTF_8);
 
-        return String.format("post-%d/%s/%s/%s", postId, type, uuid, encodedName);
-    }
 }
