@@ -1,6 +1,7 @@
 package com.ssafy.ssafy_13ban_archive.post.controller;
 
 import com.ssafy.ssafy_13ban_archive.common.model.reponse.CommonResponse;
+import com.ssafy.ssafy_13ban_archive.common.model.reponse.SuccessResponseDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.request.PostRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.PostResponseDTO;
 import com.ssafy.ssafy_13ban_archive.post.service.PostService;
@@ -28,6 +29,16 @@ public class PostController {
                 postService.createPost(postRequestDTO, images, files),
                 HttpStatus.CREATED
         );
+    }
+
+    @GetMapping("/{postId}")
+    public CommonResponse<PostResponseDTO> getPostById(@PathVariable Integer postId) {
+        return new CommonResponse<>(postService.getPostById(postId), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{postId}")
+    public CommonResponse<SuccessResponseDTO> deletePost(@PathVariable Integer postId) {
+        return new CommonResponse<>(new SuccessResponseDTO(postService.deletePost(postId)), HttpStatus.OK);
     }
 
 }

@@ -24,6 +24,31 @@ public class PostService {
     private final PostRepository postRepository;
     private final FileService fileService;
 
+    public PostResponseDTO getPostById(Integer postId) {
+        // 해당 post가 존재하는지 확인
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFoundException("글을 찾을 수 없습니다.");
+        }
+
+        // post 조회
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new PostNotFoundException("글을 찾을 수 없습니다.")
+        );
+
+        // 이미지와 파일 응답 DTO 리스트 생성
+        List<Image> images = post.getImages();
+        List<File> files = post.getFiles();
+        List<ImageResponseDTO> imageResponseDTOs = images.stream()
+                .map(this::convertToImageResponseDTO)
+                .toList();
+        List<FileResponseDTO> fileResponseDTOs = files.stream()
+                .map(this::convertToFileResponseDTO)
+                .toList();
+
+        // PostResponseDTO 생성
+        return convertToPostResponse(post, imageResponseDTOs, fileResponseDTOs);
+    }
+
     @Transactional
     public PostResponseDTO createPost(
             PostRequestDTO postRequestDTO,
@@ -55,7 +80,11 @@ public class PostService {
 
         // 이미지 업로드
         if(images != null) {
-            imageResponseDTOs = fileService.uploadImages(images, post.getPostId());
+            imageResponseDTOs = fileService.uploadImages(
+                    images,
+                    post.getPostId(),
+                    postRequestDTO.getImageComments()
+            );
         }
 
         // PostResponseDTO 생성
@@ -86,6 +115,20 @@ public class PostService {
 
     }
 
+    ImageResponseDTO convertToImageResponseDTO(Image image) {
+        return new ImageResponseDTO(
+                image.getImageId(),
+                fileService.getImageUrl(image.getImageLink()),
+                image.getComment()
+        );
+    }
+
+    FileResponseDTO convertToFileResponseDTO(File file) {
+        return new FileResponseDTO(
+                file.getFileId(),
+                file.getFileLink()
+        );
+    }
 
     private PostResponseDTO convertToPostResponse(Post post, List<ImageResponseDTO> imageResponseDTOs, List<FileResponseDTO> fileResponseDTOs) {
         return new PostResponseDTO(

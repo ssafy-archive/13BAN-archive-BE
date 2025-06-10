@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,4 +17,5 @@ public class PostRequestDTO {
     private Integer groupId;
     private PostCategory postCategory;
     private PostSubCategory postSubCategory;
+    private Map<String, String> imageComments; // imagename -> comment
 }

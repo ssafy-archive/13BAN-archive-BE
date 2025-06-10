@@ -16,10 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -77,7 +76,7 @@ public class FileService {
         }
     }
 
-    List<ImageResponseDTO> uploadImages(List<MultipartFile> images, Integer postId) {
+    List<ImageResponseDTO> uploadImages(List<MultipartFile> images, Integer postId, Map<String, String> comments) {
         List<ImageResponseDTO> imageResponseDTOs = new ArrayList<>();
         try {
             for(MultipartFile image : images){
@@ -95,11 +94,14 @@ public class FileService {
                 if (uploadSuccess) {
                     Image uploadedFile = Image.builder()
                             .imageLink(s3Key)
-                            .comment("")
+                            .comment(comments.get(originalFilename))
                             .build();
                     uploadedFile.setPostId(postId);
                     imageRepository.save(uploadedFile);
-                    imageResponseDTOs.add(new ImageResponseDTO(uploadedFile.getImageId(), s3Util.getFileUrl(s3Key).toString(), ""));
+                    imageResponseDTOs.add(new ImageResponseDTO(
+                            uploadedFile.getImageId(),
+                            s3Util.getFileUrl(s3Key).toString(),
+                            uploadedFile.getComment()));
                 }else throw new FileNotUploadedException("파일 업로드에 실패했습니다.");
             }
             return imageResponseDTOs;
@@ -122,9 +124,16 @@ public class FileService {
             return; // 이미지가 없으면 성공으로 간주
         }
         for (Image image : images) {
-            s3Util.deleteFile(image.getImageLink());
+            boolean success = s3Util.deleteFile(image.getImageLink());
             imageRepository.delete(image); // S3에서 삭제 후 로컬 DB에서도 삭제
         }
+    }
+
+    String getImageUrl(String imageLink) {
+        if (imageLink == null || imageLink.isEmpty()) {
+            return null; // 이미지 링크가 비어있으면 null 반환
+        }
+        return s3Util.getFileUrl(imageLink).toString();
     }
 
     private boolean isValidImage(MultipartFile file) {
@@ -150,9 +159,8 @@ public class FileService {
 
     private String generateS3Key(Integer postId, String originalFilename, String type) {
         String uuid = UUID.randomUUID().toString();
-        String encodedName = URLEncoder.encode(originalFilename, StandardCharsets.UTF_8);
 
-        return String.format("post-%d/%s/%s/%s", postId, type, uuid, encodedName);
+        return String.format("post-%d/%s/%s/%s", postId, type, uuid, originalFilename);
     }
 
 }
