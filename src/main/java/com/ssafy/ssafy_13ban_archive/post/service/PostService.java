@@ -1,28 +1,18 @@
 package com.ssafy.ssafy_13ban_archive.post.service;
 
-import com.ssafy.ssafy_13ban_archive.common.util.S3Util;
-import com.ssafy.ssafy_13ban_archive.post.exception.FileNotUploadedException;
-import com.ssafy.ssafy_13ban_archive.post.model.entity.File;
-import com.ssafy.ssafy_13ban_archive.post.model.entity.Image;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.Post;
 import com.ssafy.ssafy_13ban_archive.post.model.request.PostRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.FileResponseDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.ImageResponseDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.PostResponseDTO;
-import com.ssafy.ssafy_13ban_archive.post.repository.FileRepository;
-import com.ssafy.ssafy_13ban_archive.post.repository.ImageRepository;
 import com.ssafy.ssafy_13ban_archive.post.repository.PostRepository;
-import io.awspring.cloud.s3.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
