@@ -1,5 +1,8 @@
 package com.ssafy.ssafy_13ban_archive.post.service;
 
+import com.ssafy.ssafy_13ban_archive.post.exception.PostNotFoundException;
+import com.ssafy.ssafy_13ban_archive.post.model.entity.File;
+import com.ssafy.ssafy_13ban_archive.post.model.entity.Image;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.Post;
 import com.ssafy.ssafy_13ban_archive.post.model.request.PostRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.FileResponseDTO;
@@ -58,6 +61,31 @@ public class PostService {
         // PostResponseDTO 생성
         return convertToPostResponse(post, imageResponseDTOs, fileResponseDTOs);
     }
+
+    @Transactional
+    public boolean deletePost(Integer postId) {
+        // 해당 post가 존재하는지 확인
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFoundException("글을 찾을 수 없습니다.");
+        }
+
+        // 파일과 이미지 삭제
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new PostNotFoundException("글을 찾을 수 없습니다.")
+        );
+
+        List<File> files = post.getFiles();
+        fileService.deleteFiles(files);
+
+        List<Image> images = post.getImages();
+        fileService.deleteImages(images);
+
+        // post 삭제
+        postRepository.deleteById(postId);
+        return true; // 성공적으로 삭제된 경우 true 반환
+
+    }
+
 
     private PostResponseDTO convertToPostResponse(Post post, List<ImageResponseDTO> imageResponseDTOs, List<FileResponseDTO> fileResponseDTOs) {
         return new PostResponseDTO(

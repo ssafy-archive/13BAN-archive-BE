@@ -27,4 +27,11 @@ public class PostExceptionHanlder {
         return new CommonResponse<>(new ErrorBody("POST-002", "유효하지 않은 파일 형식입니다."),
                 HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    public CommonResponse<ErrorBody> postNotFoundException(PostNotFoundException e, HttpServletRequest request) {
+        log.warn("POST-003> 요청 URI: " + request.getRequestURI() + ", 에러 메세지: " + e.getMessage());
+        return new CommonResponse<>(new ErrorBody("POST-003", "해당 ID의 게시글을 찾을 수 없습니다."),
+                HttpStatus.NOT_FOUND);
+    }
 }

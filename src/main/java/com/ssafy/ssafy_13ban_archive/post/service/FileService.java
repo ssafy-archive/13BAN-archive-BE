@@ -67,6 +67,16 @@ public class FileService {
         }
     }
 
+    void deleteFiles(List<File> files) {
+        if (files == null || files.isEmpty()) {
+            return; // 파일이 없으면 성공으로 간주
+        }
+        for (File file : files) {
+            s3Util.deleteFile(file.getFileLink());
+            fileRepository.delete(file); // S3에서 삭제 후 로컬 DB에서도 삭제
+        }
+    }
+
     List<ImageResponseDTO> uploadImages(List<MultipartFile> images, Integer postId) {
         List<ImageResponseDTO> imageResponseDTOs = new ArrayList<>();
         try {
@@ -107,7 +117,17 @@ public class FileService {
         }
     }
 
-    public boolean isValidImage(MultipartFile file) {
+    void deleteImages(List<Image> images) {
+        if (images == null || images.isEmpty()) {
+            return; // 이미지가 없으면 성공으로 간주
+        }
+        for (Image image : images) {
+            s3Util.deleteFile(image.getImageLink());
+            imageRepository.delete(image); // S3에서 삭제 후 로컬 DB에서도 삭제
+        }
+    }
+
+    private boolean isValidImage(MultipartFile file) {
         if (file == null || file.isEmpty()) return false;
 
         String filename = file.getOriginalFilename();
