@@ -56,7 +56,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .claim("username", username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + accessExpirationTime * 1000L))
+                .expiration(new Date(System.currentTimeMillis() + refreshExpirationTime * 1000L))
                 .signWith(key)
                 .compact();
     }

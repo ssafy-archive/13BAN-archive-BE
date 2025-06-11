@@ -28,8 +28,8 @@ public class AuthService {
         Authentication auth = authenticator.authenticate(new UsernamePasswordAuthenticationToken(request.getId(), request.getPassword()));
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         String username = userDetails.getUsername();
-        String role = userDetails.getAuthorities().toString();
-        String accessToken = "Bearer" + jwtTokenProvider.generateAccessToken(username, role);
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        String accessToken = "Bearer " + jwtTokenProvider.generateAccessToken(username, role);
         String refreshToken = "Bearer" + jwtTokenProvider.generateRefreshToken(username);
         return new LoginResponseDTO(accessToken, refreshToken);
     }
