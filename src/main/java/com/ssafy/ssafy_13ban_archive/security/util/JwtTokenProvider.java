@@ -40,10 +40,9 @@ public class JwtTokenProvider {
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String generateAccessToken(int userId, String username, String role) {
+    public String generateAccessToken(String username, String role) {
 
         return Jwts.builder()
-                .claim("userId", userId)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -52,10 +51,10 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String generateRefreshToken(int userId, String loginId, String role) {
+    public String generateRefreshToken(String username) {
 
         return Jwts.builder()
-                .claim("loginId", loginId)
+                .claim("username", username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessExpirationTime * 1000L))
                 .signWith(key)
