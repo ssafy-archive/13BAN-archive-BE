@@ -42,7 +42,6 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-
     /**
      * Spring Security 필터 체인 설정
      * @param http HttpSecurity 객체

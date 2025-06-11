@@ -1,7 +1,7 @@
 package com.ssafy.ssafy_13ban_archive.user.service;
 
 import com.ssafy.ssafy_13ban_archive.security.dto.CustomUserDetails;
-import com.ssafy.ssafy_13ban_archive.security.util.JwtTokenProvider;
+import com.ssafy.ssafy_13ban_archive.security.util.JwtUtil;
 import com.ssafy.ssafy_13ban_archive.user.model.request.LoginRequestDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.request.LogoutRequestDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.response.ActionResponseDTO;
@@ -17,7 +17,7 @@ import org.springframework.security.core.Authentication;
 public class AuthService {
 
     private final AuthenticationManager authenticator;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtUtil jwtUtil;
 
     /**
      * 사용자 로그인을 처리하고 jwt 토큰 발급
@@ -29,8 +29,8 @@ public class AuthService {
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         String username = userDetails.getUsername();
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
-        String accessToken = "Bearer " + jwtTokenProvider.generateAccessToken(username, role);
-        String refreshToken = "Bearer" + jwtTokenProvider.generateRefreshToken(username);
+        String accessToken = "Bearer " + jwtUtil.generateAccessToken(username, role);
+        String refreshToken = "Bearer " + jwtUtil.generateRefreshToken(username);
         return new LoginResponseDTO(accessToken, refreshToken);
     }
 
@@ -40,6 +40,15 @@ public class AuthService {
      * @return 로그아웃 처리 결과
      */
     public ActionResponseDTO logout(LogoutRequestDTO request) {
+        String refreshToken = request.getRefreshToken();
+
+        // 토큰 형식 검증
+        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
+            return new ActionResponseDTO(false);
+        }
+
+        String token = jwtUtil.extractToken(refreshToken);
+        jwtUtil.addToBlacklist(token);
         return new ActionResponseDTO(true);
     }
 

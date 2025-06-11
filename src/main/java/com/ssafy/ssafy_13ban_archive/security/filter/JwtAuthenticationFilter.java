@@ -1,7 +1,7 @@
 package com.ssafy.ssafy_13ban_archive.security.filter;
 
 import com.ssafy.ssafy_13ban_archive.security.dto.CustomUserDetails;
-import com.ssafy.ssafy_13ban_archive.security.util.JwtTokenProvider;
+import com.ssafy.ssafy_13ban_archive.security.util.JwtUtil;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.UserRole;
 import jakarta.servlet.FilterChain;
@@ -21,13 +21,12 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
-
+    private final JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //request에서 Authorization 헤더를 찾음
-        String authorization= request.getHeader("Authorization");
+        String authorization = request.getHeader("Authorization");
 
         //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
@@ -40,19 +39,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         //Bearer 부분 제거 후 순수 토큰만 획득
         String token = authorization.split(" ")[1];
 
-        //토큰 소멸 시간 검증
-        if (jwtTokenProvider.isExpired(token)) {
-
-            System.out.println("token expired");
-            filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료 (필수)
+        if (!jwtUtil.validateToken(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter().write("{\"error\":\"Invalid or expired token\"}");
+            response.getWriter().flush();
             return;
         }
 
         //토큰에서 username과 role 획득
-        String username = jwtTokenProvider.getUsername(token);
-        String role = jwtTokenProvider.getRole(token);
+        String username = jwtUtil.getUsername(token);
+        String role = jwtUtil.getRole(token);
 
         //userEntity를 생성하여 값 set
         User user = new User();
