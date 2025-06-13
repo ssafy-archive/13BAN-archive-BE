@@ -2,6 +2,7 @@ package com.ssafy.ssafy_13ban_archive.user.service;
 
 import com.ssafy.ssafy_13ban_archive.security.dto.CustomUserDetails;
 import com.ssafy.ssafy_13ban_archive.security.util.JwtUtil;
+import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
 import com.ssafy.ssafy_13ban_archive.user.model.request.LoginRequestDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.request.LogoutRequestDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.response.ActionResponseDTO;
@@ -27,10 +28,9 @@ public class AuthService {
     public LoginResponseDTO login(LoginRequestDTO request) {
         Authentication auth = authenticator.authenticate(new UsernamePasswordAuthenticationToken(request.getId(), request.getPassword()));
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-        String username = userDetails.getUsername();
-        String role = userDetails.getAuthorities().iterator().next().getAuthority();
-        String accessToken = "Bearer " + jwtUtil.generateAccessToken(username, role);
-        String refreshToken = "Bearer " + jwtUtil.generateRefreshToken(username);
+        User user = userDetails.getUser();
+        String accessToken = "Bearer " + jwtUtil.generateAccessToken(user);
+        String refreshToken = "Bearer " + jwtUtil.generateRefreshToken(user.getUserId());
         return new LoginResponseDTO(accessToken, refreshToken);
     }
 

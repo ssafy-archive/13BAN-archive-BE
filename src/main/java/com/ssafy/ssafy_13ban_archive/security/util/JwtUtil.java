@@ -1,5 +1,8 @@
 package com.ssafy.ssafy_13ban_archive.security.util;
 
+import com.ssafy.ssafy_13ban_archive.security.dto.JwtUserInfo;
+import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -43,12 +46,14 @@ public class JwtUtil {
     /**
      * Access Token 생성
      */
-    public String generateAccessToken(String username, String role) {
-
+    public String generateAccessToken(User user) {
         return Jwts.builder()
-                .subject(username)
-                .claim("username", username)
-                .claim("role", role)
+                .subject(String.valueOf(user.getUserId()))
+                .claim("userId", user.getUserId())
+                .claim("loginId", user.getLoginId())
+                .claim("name", user.getName())
+                .claim("ssafyNumber", user.getSsafyNumber())
+                .claim("role", user.getUserRole().getRole())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessExpirationTime * 1000L))
                 .signWith(key)
@@ -58,11 +63,11 @@ public class JwtUtil {
     /**
      * Refresh Token 생성
      */
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(Integer userId) {
 
         return Jwts.builder()
-                .subject(username)
-                .claim("username", username)
+                .subject(String.valueOf(userId))
+                .claim("userId", userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshExpirationTime * 1000L))
                 .signWith(key)
@@ -70,13 +75,60 @@ public class JwtUtil {
     }
 
     /**
-     * 토큰에서 username 추출
+     * 토큰에서 JwtUserInfo 추출
      */
-    public String getUsername(String token) {
+    public JwtUserInfo getUserInfoFromToken(String token) {
+        Claims claims = getJwtParser()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return new JwtUserInfo(
+                claims.get("userId", Integer.class),        // PK
+                claims.get("loginId", String.class),        // 로그인 ID
+                claims.get("name", String.class),           // 이름
+                claims.get("ssafyNumber", String.class),    // 싸피번호
+                claims.get("role", String.class)            // 권한
+        );
+    }
+
+    /**
+     * 토큰에서 userId 추출
+     */
+    public int getUserId(String token) {
         return getJwtParser()
                 .parseSignedClaims(token)
                 .getPayload()
-                .get("username", String.class);
+                .get("userId", Integer.class);
+    }
+
+    /**
+     * 토큰에서 loginId 추출
+     */
+    public String getLoginId(String token) {
+        return getJwtParser()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("loginId", String.class);
+    }
+
+    /**
+     * 토큰에서 name 추출
+     */
+    public String getName(String token) {
+        return getJwtParser()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("name", String.class);
+    }
+
+    /**
+     * 토큰에서 ssafyNumber 추출
+     */
+    public String getSsafyNumber(String token) {
+        return getJwtParser()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("ssafyNumber", String.class);
     }
 
     /**
@@ -133,7 +185,7 @@ public class JwtUtil {
      * 토큰이 블랙리스트에 등록되어 있는지 확인
      */
     private boolean isTokenBlacklisted(String token) {
-        return redisTemplate.hasKey(BLACKLIST_PREFIX + token);
+        return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_PREFIX + token));
     }
 
     /**

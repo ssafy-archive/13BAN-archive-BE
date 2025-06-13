@@ -1,6 +1,7 @@
 package com.ssafy.ssafy_13ban_archive.security.filter;
 
 import com.ssafy.ssafy_13ban_archive.security.dto.CustomUserDetails;
+import com.ssafy.ssafy_13ban_archive.security.dto.JwtUserInfo;
 import com.ssafy.ssafy_13ban_archive.security.util.JwtUtil;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.UserRole;
@@ -11,11 +12,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -31,8 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료
             return;
         }
 
@@ -47,21 +48,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        //토큰에서 username과 role 획득
-        String username = jwtUtil.getUsername(token);
-        String role = jwtUtil.getRole(token);
+        //토큰에서 userinfo 추출
+        JwtUserInfo userInfo = jwtUtil.getUserInfoFromToken(token);
 
-        //userEntity를 생성하여 값 set
-        User user = new User();
-        user.setLoginId(username);
-        user.setUserRole(UserRole.valueOf(role));
+        List<SimpleGrantedAuthority> authorities = List.of(
+                new SimpleGrantedAuthority(userInfo.getRole())
+        );
 
-        //UserDetails에 회원 정보 객체 담기
-        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+        // JwtUserInfo를 직접 Principal로 설정
+        Authentication authToken = new UsernamePasswordAuthenticationToken(
+                userInfo,
+                null,
+                authorities
+        );
 
-        //스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-        //세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
