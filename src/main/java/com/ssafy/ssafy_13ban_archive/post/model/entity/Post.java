@@ -51,7 +51,7 @@ public class Post extends DateEntity {
     private PostCategory category;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "sub_category", nullable = true, insertable = false, updatable = false)
+    @Column(name = "sub_category", nullable = false)
     private PostSubCategory subCategory;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

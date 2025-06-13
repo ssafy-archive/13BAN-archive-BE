@@ -11,6 +11,7 @@ public enum PostSubCategory {
     OTHER(PostCategory.INFORMATRION, "기타"),
     // 갤러리
     //자유게시판
+    NONE(null, null),
     ;
 
     private final PostCategory postCategory;
