@@ -1,11 +1,11 @@
 package com.ssafy.ssafy_13ban_archive.user.service;
 
+import com.ssafy.ssafy_13ban_archive.common.model.reponse.SuccessResponseDTO;
 import com.ssafy.ssafy_13ban_archive.security.dto.CustomUserDetails;
 import com.ssafy.ssafy_13ban_archive.security.util.JwtUtil;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
 import com.ssafy.ssafy_13ban_archive.user.model.request.LoginRequestDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.request.LogoutRequestDTO;
-import com.ssafy.ssafy_13ban_archive.user.model.response.ActionResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.response.LoginResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,17 +39,17 @@ public class AuthService {
      * @param request 로그아웃 요청 정보
      * @return 로그아웃 처리 결과
      */
-    public ActionResponseDTO logout(LogoutRequestDTO request) {
+    public SuccessResponseDTO logout(LogoutRequestDTO request) {
         String refreshToken = request.getRefreshToken();
 
         // 토큰 형식 검증
         if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
-            return new ActionResponseDTO(false);
+            return new SuccessResponseDTO(false);
         }
 
         String token = jwtUtil.extractToken(refreshToken);
         jwtUtil.addToBlacklist(token);
-        return new ActionResponseDTO(true);
+        return new SuccessResponseDTO(true);
     }
 
 }

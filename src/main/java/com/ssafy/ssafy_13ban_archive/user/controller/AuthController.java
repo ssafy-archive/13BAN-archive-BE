@@ -1,9 +1,9 @@
 package com.ssafy.ssafy_13ban_archive.user.controller;
 
 import com.ssafy.ssafy_13ban_archive.common.model.reponse.CommonResponse;
+import com.ssafy.ssafy_13ban_archive.common.model.reponse.SuccessResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.request.LoginRequestDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.request.LogoutRequestDTO;
-import com.ssafy.ssafy_13ban_archive.user.model.response.ActionResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.response.LoginResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public CommonResponse<ActionResponseDTO> logout(@RequestBody LogoutRequestDTO request) {
+    public CommonResponse<SuccessResponseDTO> logout(@RequestBody LogoutRequestDTO request) {
         return new CommonResponse<>(authService.logout(request), HttpStatus.OK);
     }
 
