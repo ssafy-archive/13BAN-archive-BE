@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
-public class PostExceptionHanlder {
+public class PostExceptionHandler {
     @ExceptionHandler(FileNotUploadedException.class)
     public CommonResponse<ErrorBody> fileNotUploadedException(FileNotUploadedException e, HttpServletRequest request) {
         log.warn("POST-001> 요청 URI: " + request.getRequestURI() + ", 에러 메세지: " + e.getMessage());
