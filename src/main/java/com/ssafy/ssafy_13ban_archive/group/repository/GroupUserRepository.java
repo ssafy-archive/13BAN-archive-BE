@@ -11,6 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface GroupUserRepository extends JpaRepository<GroupUser, Integer>, QuerydslPredicateExecutor<GroupUser> {
+public interface GroupUserRepository extends JpaRepository<GroupUser, Integer>, QuerydslPredicateExecutor<GroupUser>, GroupUserQueryRepository {
     Optional<GroupUser> findByGroupAndUser(Group group, User user);
 }

@@ -8,6 +8,7 @@ import com.ssafy.ssafy_13ban_archive.group.model.entity.GroupUser;
 import com.ssafy.ssafy_13ban_archive.group.model.request.GroupCreateRequestDTO;
 import com.ssafy.ssafy_13ban_archive.group.model.response.GroupListResponseDTO;
 import com.ssafy.ssafy_13ban_archive.group.model.response.GroupResponseDTO;
+import com.ssafy.ssafy_13ban_archive.group.model.response.GroupRoleResponseDTO;
 import com.ssafy.ssafy_13ban_archive.group.repository.GroupRepository;
 import com.ssafy.ssafy_13ban_archive.group.repository.GroupUserRepository;
 import com.ssafy.ssafy_13ban_archive.security.dto.JwtUserInfo;
@@ -41,6 +42,21 @@ public class GroupUserService {
         return true;
     }
 
+    public GroupListResponseDTO getMyGroups(JwtUserInfo jwtUserInfo) {
+        List<GroupUser> groupUsers = groupUserRepository.findGroupsByUserId(jwtUserInfo.getUserId());
+
+        List<GroupRoleResponseDTO> groupRoleResponseDTOs = groupUsers.stream()
+                .map(groupUser -> {
+                    Group group = groupUser.getGroup();
+                    return new GroupRoleResponseDTO(
+                            group.getGroupId(),
+                            group.getGroupName(),
+                            group.getGroupKey(),
+                            groupUser.getGroupRole()
+                    );
+                }).toList();
+        return new GroupListResponseDTO(groupRoleResponseDTOs);
+    }
 
     private User checkUserExists(JwtUserInfo jwtUserInfo) {
         return userRepository.findById(jwtUserInfo.getUserId())

@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface GroupRepository extends JpaRepository<Group,Integer>, QuerydslPredicateExecutor<Group> {
+public interface GroupRepository extends JpaRepository<Group,Integer>, QuerydslPredicateExecutor<Group>{
     Optional<Group> findByGroupKey(String groupKey);
 }
