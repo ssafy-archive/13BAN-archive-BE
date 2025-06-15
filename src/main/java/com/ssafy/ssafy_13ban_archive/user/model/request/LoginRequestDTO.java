@@ -1,8 +1,8 @@
 package com.ssafy.ssafy_13ban_archive.user.model.request;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class LoginRequestDTO {
 
     private String id;

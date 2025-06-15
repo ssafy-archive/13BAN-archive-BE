@@ -8,4 +8,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // loginId를 받아 DB 테이블에서 회원 조회
     User findByLoginId(String loginId);
 
+    // loginId 존재 여부 확인
+    boolean existsByLoginId(String loginId);
+
 }
