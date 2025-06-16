@@ -24,6 +24,7 @@ public class UserController {
     @Operation(summary = "회원가입", description = "사용자 회원가입을 진행합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원가입 성공"),
+            @ApiResponse(responseCode = "400", description = "회원가입 실패")
     })
     @PostMapping("/signIn")
     public CommonResponse<SignInResponseDTO> signIn(@RequestBody SignInRequestDTO request) {
