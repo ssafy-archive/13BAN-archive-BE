@@ -21,4 +21,10 @@ public class UserExceptionHandler {
         return new CommonResponse<>(new ErrorBody("USER-001", "회원가입에 실패했습니다."), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public CommonResponse<ErrorBody> userNotFoundException(UserNotFoundException e, HttpServletRequest request) {
+        log.warn("USER-002> 요청 URI: " + request.getRequestURI() + ", 에러 메시지: " + e.getMessage());
+        return new CommonResponse<>(new ErrorBody("USER-002", "잘못된 사용자입니다."), HttpStatus.NOT_FOUND);
+    }
+
 }

@@ -1,10 +1,12 @@
 package com.ssafy.ssafy_13ban_archive.user.service;
 
 import com.ssafy.ssafy_13ban_archive.user.exception.SignInFailureException;
+import com.ssafy.ssafy_13ban_archive.user.exception.UserNotFoundException;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.UserRole;
 import com.ssafy.ssafy_13ban_archive.user.model.request.SignInRequestDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.response.SignInResponseDTO;
+import com.ssafy.ssafy_13ban_archive.user.model.response.UserResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,7 +52,31 @@ public class UserService {
         // DB에 저장
         User savedUser = userRepository.save(user);
 
-        return new SignInResponseDTO(savedUser.getUserId(), savedUser.getLoginId(), savedUser.getName(), savedUser.getSsafyNumber(), savedUser.getUserRole().getRole());
+        return SignInResponseDTO.builder()
+                .userId(savedUser.getUserId())
+                .loginId(savedUser.getLoginId())
+                .name(savedUser.getName())
+                .ssafyNumber(savedUser.getSsafyNumber())
+                .userRole(savedUser.getUserRole().getRole())
+                .build();
+    }
+
+    /**
+     * 특정 사용자 조회
+     * @param userId 사용자의 userId(pk)
+     * @return 사용자 정보(비밀번호 제외)
+     */
+    public UserResponseDTO getUser(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        return UserResponseDTO.builder()
+                .userId(user.getUserId())
+                .loginId(user.getLoginId())
+                .name(user.getName())
+                .ssafyNumber(user.getSsafyNumber())
+                .userRole(user.getUserRole().getRole())
+                .build();
     }
 
 }
