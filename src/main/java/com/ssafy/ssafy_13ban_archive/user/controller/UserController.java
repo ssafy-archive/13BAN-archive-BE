@@ -55,6 +55,7 @@ public class UserController {
     @Operation(summary = "특정 사용자 비밀번호 업데이트", description = "userId를 가지는 사용자 비밀번호를 업데이트합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "사용자 비밀번호 업데이트 성공"),
+            @ApiResponse(responseCode = "400", description = "현재 비밀번호 불일치 또는 새 비밀번호가 현재 비밀번호와 동일 또는 입력값 검증 실패"),
             @ApiResponse(responseCode = "404", description = "사용자 없음")
     })
     @PutMapping("/{userId}/password")
