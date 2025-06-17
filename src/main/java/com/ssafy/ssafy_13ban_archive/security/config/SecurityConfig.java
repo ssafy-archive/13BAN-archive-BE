@@ -4,6 +4,7 @@ import com.ssafy.ssafy_13ban_archive.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -64,7 +65,8 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/v1/user/login").permitAll()
-                .requestMatchers("/api/v1/user/logout").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/user").permitAll()  // 회원가입
+                .requestMatchers("/api/v1/user/**").authenticated()
                 .anyRequest().permitAll()
         );
 
