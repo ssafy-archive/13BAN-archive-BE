@@ -47,7 +47,7 @@ public class GroupCRUDService {
                 GroupUser groupUser = new GroupUser();
                 groupUser.setGroup(group);
                 groupUser.setUser(user);
-                groupUser.setGroupRole(GroupRole.ADMIN);
+                groupUser.setGroupRole(GroupRole.CREATOR);
                 groupUser.setStatus(Status.ACCEPTED);
                 groupUserRepository.save(groupUser);
                 return convertToResponseDTO(group);
