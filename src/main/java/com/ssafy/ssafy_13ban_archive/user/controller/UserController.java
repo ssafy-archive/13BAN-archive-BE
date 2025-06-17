@@ -63,4 +63,14 @@ public class UserController {
         return new CommonResponse<>(userService.updateUserPassword(userId, request), HttpStatus.OK);
     }
 
+    @Operation(summary = "특정 사용자 삭제", description = "userId를 가지는 사용자를 삭제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "사용자 비밀번호 업데이트 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자 없음")
+    })
+    @DeleteMapping("/{userId}")
+    public CommonResponse<SuccessResponseDTO> deleteUser(@PathVariable Integer userId) {
+        return new CommonResponse<>(userService.deleteUser(userId), HttpStatus.OK);
+    }
+
 }

@@ -133,4 +133,17 @@ public class UserService {
         return new SuccessResponseDTO(true);
     }
 
+    /**
+     * 특정 사용자 삭제
+     * @param userId 사용자의 userId(pk)
+     * @return 삭제 처리 결과
+     */
+    public SuccessResponseDTO deleteUser(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        userRepository.delete(user);
+        return new SuccessResponseDTO(true);
+    }
+
 }
