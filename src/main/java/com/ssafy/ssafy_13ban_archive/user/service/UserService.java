@@ -1,13 +1,16 @@
 package com.ssafy.ssafy_13ban_archive.user.service;
 
+import com.ssafy.ssafy_13ban_archive.common.model.reponse.SuccessResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.exception.SignInFailureException;
 import com.ssafy.ssafy_13ban_archive.user.exception.UserNotFoundException;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
 import com.ssafy.ssafy_13ban_archive.user.model.entity.UserRole;
 import com.ssafy.ssafy_13ban_archive.user.model.request.SignInRequestDTO;
+import com.ssafy.ssafy_13ban_archive.user.model.request.UserUpdateRequest;
 import com.ssafy.ssafy_13ban_archive.user.model.response.SignInResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.response.UserResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.repository.UserRepository;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +29,7 @@ public class UserService {
      * @return 회원가입 응답 정보
      */
     @Transactional
-    public SignInResponseDTO signIn(SignInRequestDTO request) {
+    public SignInResponseDTO createUser(SignInRequestDTO request) {
         String loginId = request.getLoginId();
         String password = request.getPassword();
         String name = request.getName();
@@ -77,6 +80,25 @@ public class UserService {
                 .ssafyNumber(user.getSsafyNumber())
                 .userRole(user.getUserRole().getRole())
                 .build();
+    }
+
+    /**
+     * 특정 사용자 업데이트
+     * @param userId 사용자의 userId(pk)
+     * @param request 업데이트하고자 하는 정보
+     * @return 업데이트 처리 결과
+     */
+    @Transactional
+    public SuccessResponseDTO updateUser(int userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        user.setName(request.getName());
+        if (request.getSsafyNumber() != null) {
+            user.setSsafyNumber(request.getSsafyNumber());
+        }
+
+        return new SuccessResponseDTO(true);
     }
 
 }

@@ -1,7 +1,9 @@
 package com.ssafy.ssafy_13ban_archive.user.controller;
 
 import com.ssafy.ssafy_13ban_archive.common.model.reponse.CommonResponse;
+import com.ssafy.ssafy_13ban_archive.common.model.reponse.SuccessResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.request.SignInRequestDTO;
+import com.ssafy.ssafy_13ban_archive.user.model.request.UserUpdateRequest;
 import com.ssafy.ssafy_13ban_archive.user.model.response.SignInResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.model.response.UserResponseDTO;
 import com.ssafy.ssafy_13ban_archive.user.service.UserService;
@@ -25,8 +27,8 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "회원가입 실패")
     })
     @PostMapping
-    public CommonResponse<SignInResponseDTO> signIn(@RequestBody SignInRequestDTO request) {
-        return new CommonResponse<>(userService.signIn(request), HttpStatus.OK);
+    public CommonResponse<SignInResponseDTO> createUser(@RequestBody SignInRequestDTO request) {
+        return new CommonResponse<>(userService.createUser(request), HttpStatus.OK);
     }
 
     @Operation(summary = "특정 사용자 조회", description = "userId를 가지는 사용자를 조회합니다.")
@@ -37,6 +39,16 @@ public class UserController {
     @GetMapping("/{userId}")
     public CommonResponse<UserResponseDTO> getUser(@PathVariable Integer userId) {
         return new CommonResponse<>(userService.getUser(userId), HttpStatus.OK);
+    }
+
+    @Operation(summary = "특정 사용자 업데이트", description = "userId를 사지는 사용자 정보를 업데이트합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "사용자 업데이트 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자 없음")
+    })
+    @PutMapping("/{userId}")
+    public CommonResponse<SuccessResponseDTO> updateUser(@PathVariable Integer userId, @RequestBody UserUpdateRequest request) {
+        return new CommonResponse<>(userService.updateUser(userId, request), HttpStatus.OK);
     }
 
 }
