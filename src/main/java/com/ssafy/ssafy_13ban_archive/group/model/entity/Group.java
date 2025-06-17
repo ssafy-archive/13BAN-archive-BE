@@ -3,6 +3,7 @@ package com.ssafy.ssafy_13ban_archive.group.model.entity;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.Post;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "user_group")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Group {
@@ -22,7 +24,7 @@ public class Group {
     @Column(name = "group_name", nullable = false, length = 50)
     private String groupName;
 
-    @Column(name = "group_key", nullable = false, length = 50)
+    @Column(name = "group_key", unique = true, nullable = false, length = 50)
     private String groupKey;
 
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
