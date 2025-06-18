@@ -1,5 +1,6 @@
 package com.ssafy.ssafy_13ban_archive.common.model.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -14,8 +15,10 @@ import java.time.LocalDateTime;
 @Getter
 public class DateEntity {
     @CreatedDate
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
