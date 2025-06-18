@@ -64,7 +64,7 @@ public class GroupAdminService {
         GroupUser groupUser = groupUserRepository.findByGroupAndUser(group, user)
                 .orElseThrow(() -> new NotInGroupException("그룹 사용자 정보를 찾을 수 없습니다."));
 
-        if (groupUser.getGroupRole() != GroupRole.ADMIN) {
+        if (groupUser.getGroupRole() != GroupRole.ADMIN && groupUser.getGroupRole() != GroupRole.CREATOR) {
             throw new NotAdminException("그룹 관리자만 멤버 요청을 수락할 수 있습니다.");
         }
 
