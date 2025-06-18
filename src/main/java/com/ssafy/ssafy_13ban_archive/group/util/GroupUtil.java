@@ -20,6 +20,9 @@ public class GroupUtil {
 
 
     public User checkUserExists(JwtUserInfo jwtUserInfo) {
+        if (jwtUserInfo == null) {
+            throw new UserNotFoundException("사용자 정보가 유효하지 않습니다.");
+        }
         return userRepository.findById(jwtUserInfo.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
     }
