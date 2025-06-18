@@ -2,8 +2,10 @@ package com.ssafy.ssafy_13ban_archive.group.model.entity;
 
 import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 @Table(name = "group_user")
 public class GroupUser {
     @Id
@@ -11,9 +13,23 @@ public class GroupUser {
     @Column(name = "group_user_id")
     private Integer groupUserId;
 
+    @Transient
+    private Integer groupId;
+
+    public Integer getGroupId() {
+        return group != null ? group.getGroupId() : null;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
+
+    @Transient
+    private Integer userId;
+
+    public Integer getUserId() {
+        return user != null ? user.getUserId() : null;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

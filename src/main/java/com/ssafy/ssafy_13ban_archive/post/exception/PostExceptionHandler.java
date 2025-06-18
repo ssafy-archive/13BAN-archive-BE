@@ -34,4 +34,11 @@ public class PostExceptionHandler {
         return new CommonResponse<>(new ErrorBody("POST-003", "해당 ID의 게시글을 찾을 수 없습니다."),
                 HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(PermisionDeniedException.class)
+    public CommonResponse<ErrorBody> permisionDeniedException(PermisionDeniedException e, HttpServletRequest request) {
+        log.warn("POST-004> 요청 URI: " + request.getRequestURI() + ", 에러 메세지: " + e.getMessage());
+        return new CommonResponse<>(new ErrorBody("POST-004", "권한이 없습니다."),
+                HttpStatus.FORBIDDEN);
+    }
 }

@@ -1,13 +1,17 @@
 package com.ssafy.ssafy_13ban_archive.post.service;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
+import com.ssafy.ssafy_13ban_archive.group.exception.UserNotFoundException;
+import com.ssafy.ssafy_13ban_archive.post.exception.PermisionDeniedException;
 import com.ssafy.ssafy_13ban_archive.post.exception.PostNotFoundException;
 import com.ssafy.ssafy_13ban_archive.post.model.entity.*;
 import com.ssafy.ssafy_13ban_archive.post.model.request.PostModifyRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.request.PostRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.*;
 import com.ssafy.ssafy_13ban_archive.post.repository.PostRepository;
+import com.ssafy.ssafy_13ban_archive.security.dto.JwtUserInfo;
+import com.ssafy.ssafy_13ban_archive.user.model.entity.User;
+import com.ssafy.ssafy_13ban_archive.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,6 +30,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final FileService fileService;
+    private final UserRepository userRepository;
 
     public PostResponseDTO getPostById(Integer postId) {
         // 해당 post가 존재하는지 확인
@@ -95,8 +100,10 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDTO modifyPost(PostModifyRequestDTO postModifyRequestDTO, Integer postId, List<MultipartFile> images, List<MultipartFile> files) {
-        // TODO: 권한 체크 로직 추가 필요
+    public PostResponseDTO modifyPost(PostModifyRequestDTO postModifyRequestDTO, Integer postId, List<MultipartFile> images, List<MultipartFile> files, JwtUserInfo jwtUserInfo) {
+        User user = userRepository.findById(jwtUserInfo.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
         // 해당 post가 존재하는지 확인
         if (!postRepository.existsById(postId)) {
             throw new PostNotFoundException("글을 찾을 수 없습니다.");
@@ -106,6 +113,11 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new PostNotFoundException("글을 찾을 수 없습니다.")
         );
+
+        // post 작성자와 현재 유저가 일치하는지 확인
+        if (!post.getUserId().equals(user.getUserId())) {
+            throw new PermisionDeniedException("해당 글을 수정할 권한이 없습니다.");
+        }
 
         // post 수정
         post.setTitle(postModifyRequestDTO.getTitle());
@@ -184,18 +196,19 @@ public class PostService {
     }
 
     @Transactional
-    public boolean deletePost(Integer postId) {
-        // TODO: 권한 체크 로직 추가 필요
-
-        // 해당 post가 존재하는지 확인
-        if (!postRepository.existsById(postId)) {
-            throw new PostNotFoundException("글을 찾을 수 없습니다.");
-        }
+    public boolean deletePost(Integer postId, JwtUserInfo jwtUserInfo) {
+        User user = userRepository.findById(jwtUserInfo.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 파일과 이미지 삭제
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new PostNotFoundException("글을 찾을 수 없습니다.")
         );
+
+        // post 작성자와 현재 유저가 일치하는지 확인
+        if (!post.getUserId().equals(user.getUserId())) {
+            throw new PermisionDeniedException("해당 글을 삭제할 권한이 없습니다.");
+        }
 
         List<File> files = post.getFiles();
         fileService.deleteFiles(files);

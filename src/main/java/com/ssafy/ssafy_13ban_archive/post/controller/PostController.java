@@ -9,6 +9,7 @@ import com.ssafy.ssafy_13ban_archive.post.model.request.PostRequestDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.PostListResponseDTO;
 import com.ssafy.ssafy_13ban_archive.post.model.response.PostResponseDTO;
 import com.ssafy.ssafy_13ban_archive.post.service.PostService;
+import com.ssafy.ssafy_13ban_archive.security.dto.JwtUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -136,10 +138,11 @@ public class PostController {
             @PathVariable Integer postId,
             @RequestPart("post") PostModifyRequestDTO postModifyRequestDTO,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
-    ) {
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @AuthenticationPrincipal JwtUserInfo jwtUserInfo
+            ) {
         return new CommonResponse<>(
-                postService.modifyPost(postModifyRequestDTO, postId, images, files),
+                postService.modifyPost(postModifyRequestDTO, postId, images, files, jwtUserInfo),
                 HttpStatus.OK
         );
     }
@@ -151,8 +154,11 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
     @DeleteMapping("/{postId}")
-    public CommonResponse<SuccessResponseDTO> deletePost(@PathVariable Integer postId) {
-        return new CommonResponse<>(new SuccessResponseDTO(postService.deletePost(postId)), HttpStatus.OK);
+    public CommonResponse<SuccessResponseDTO> deletePost(
+            @PathVariable Integer postId,
+            @AuthenticationPrincipal JwtUserInfo jwtUserInfo
+    ){
+        return new CommonResponse<>(new SuccessResponseDTO(postService.deletePost(postId, jwtUserInfo)), HttpStatus.OK);
     }
 
 }
