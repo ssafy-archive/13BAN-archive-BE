@@ -49,14 +49,16 @@ public class PostController {
     })
     @GetMapping
     public CommonResponse<PostListResponseDTO> getPostsWithLastId(
-            @RequestParam(name = "category", defaultValue = "FREE") PostCategory category,
-            @RequestParam(name = "subCategory", defaultValue = "NONE") PostSubCategory subCategory,
+            @RequestParam(name = "category", required = false) PostCategory category,
+            @RequestParam(name = "subCategory", required = false) PostSubCategory subCategory,
             @RequestParam("groupId") Integer groupId,
             @RequestParam(name = "lastPostId", defaultValue = "0") Integer lastPostId,
-            @RequestParam(name = "size", defaultValue = "10") Integer size
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "title", required = false) String title,
+            @RequestParam(name = "userId", required = false) Integer userId
     ) {
         return new CommonResponse<>(
-                postService.getPostsWithLastId(category, subCategory, groupId, lastPostId, size),
+                postService.getPostsWithLastId(category, subCategory, groupId, lastPostId, size, title, userId),
                 HttpStatus.OK
         );
     }
