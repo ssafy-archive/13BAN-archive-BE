@@ -56,24 +56,12 @@ public class PostService {
     public PostListResponseDTO getPostsWithLastId(
             PostCategory category,
             PostSubCategory subCategory,
-            Integer groupId, Integer lastPostId, Integer size) {
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(post.groupId.eq(groupId))
-                .and(post.postId.gt(lastPostId));
+            Integer groupId, Integer lastPostId, Integer size, String title, Integer userId) {
 
-        // category가 null이 아닐 때만 조건 추가
-        if (category != null) {
-            builder.and(post.category.eq(category)); // 또는 lt(category)
-        }
-
-        // subCategory가 null이 아닐 때만 조건 추가
-        if (subCategory != null) {
-            builder.and(post.subCategory.eq(subCategory)); // 또는 lt(subCategory)
-        }
-
-        PageRequest pageRequest = PageRequest.of(0, size, Sort.by("postId").descending());
-
-        List<Post> posts = postRepository.findAll(builder, pageRequest).getContent();
+        // 조건에 맞는 게시글 조회
+        List<Post> posts = postRepository.findAllByConditionWithLastPostId(
+                category, subCategory, groupId, lastPostId, size, title, userId
+        );
 
         PostListResponseDTO postListResponseDTO = new PostListResponseDTO();
         postListResponseDTO.setCategory(category);
