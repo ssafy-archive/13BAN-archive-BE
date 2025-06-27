@@ -1,0 +1,40 @@
+services:
+  ssafy-archive-server:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      MYSQL_URL: ${MYSQL_URL}
+      MYSQL_USERNAME: ${MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESSTOKEN_EXPIRATION: ${JWT_ACCESSTOKEN_EXPIRATION}
+      JWT_REFRESHTOKEN_EXPIRATION: ${JWT_REFRESHTOKEN_EXPIRATION}
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  redis-data:
